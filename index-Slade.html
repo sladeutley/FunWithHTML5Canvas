@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Canvas</title>
+</head>
+<body>
+  <!-- need this canvas in html to draw on -->
+<canvas id="draw" width="800" height="800"></canvas>
+<script>
+
+const canvas = document.querySelector('#draw');
+// 1. below, need to draw on something called the context, bc don't draw on actual canvas. can either be 2d or 3d
+const ctx = canvas.getContext('2d');
+// 2. below, size up canvas to be exact size of window
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+// 3. below, 
+ctx.strokeStyle = '#BADA55';
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+// 10. make lines not so small
+ctx.lineWidth = 100;
+// 14. play with something called Global Composite Operator - like blend mode
+ctx.globalCompositeOperation = 'multiply'; //if google Global Composite Operator, you can change to different than 'multiply'
+
+// 4. below, need dummy variables. this is needed bc when you click down on element it needs to be flagged that it's clicked to draw and then unclicked to undraw
+let isDrawing = false;
+// 5. below, need these variables because need a starting x and y and an ending x and y for the line you draw
+let lastX = 0;
+let lastY = 0;
+
+// 11. having more fun with colors now using HSL (website https://mothereffinghsl.com/)
+let hue = 0;
+// 13. 
+let direction = true; // means it's going to be building up
+
+// 6. 
+function draw (e) {
+  if (!isDrawing) return; // stop the function from running when they are not moused down
+  console.log(e);
+  // *** 11. Below, Part of step 11
+  ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+  // *** 11. Above, part of step 11 
+  // 7. below, within this function, is where we will do the actual drawing. this is done after all the event listeners below have already been done bc we needed them to know if the drawing functionality was working first (using console.log(e))
+  ctx.beginPath();
+  // 8. need to start with an x and a y, move it to an x and a y, and that will complete our drawing 
+  // start from
+  ctx.moveTo(lastX, lastY);
+  // go to
+  ctx.lineTo(e.offsetX, e.offsetY); //these are properties on mouse Event object
+  ctx.stroke();
+  // 9. below, now need to update where these lastX and lastY variables end up. Or else it'll look like just a straight line. comment this out to see 
+
+  // lastX = e.offsetX;
+  // lastY = e.offsetY;
+  // above is perfectly fine way to update these variables, but we can make it more concise code by'destructuring an array' 
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+  // 10. when click down, it starts at x and y 0,0. and when pick up to draw again, it creates a line from the last ending point. need to fix that. Do that below by adjusting event listeners
+  // *** 12. Below, Part of step 12
+  hue++; //increments color (changes color) as you draw
+  if (hue >= 360) {
+    hue = 0;
+  }
+  // *** 12. Above, part of step 12
+  // *** 13. Below, Part of step 13
+  // ctx.lineWidth++; -> originally had this, but that'll just keep it going up, so want it to flip directions by code below
+  if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+    direction = !direction; //flips the directions
+  }
+  if (direction) {
+    ctx.lineWidth++;
+  } else {
+    ctx.lineWidth--;
+  }
+  
+  console.log('ctx.lineWidth',ctx.lineWidth);
+  // *** 13. Above, part of step 13 
+}
+
+// 7. *** Below is the orginal event listeners before needing to update after step 10
+
+// canvas.addEventListener('mousemove', draw);
+// canvas.addEventListener('mousedown', () => isDrawing = true); // this is an inline function called within an event listner
+// canvas.addEventListener('mouseup', () => isDrawing = false);
+// canvas.addEventListener('mouseout', () => isDrawing = false);
+
+// 7. *** Above is the orginal event listeners before needing to update after step 10
+
+// 10.
+canvas.addEventListener('mousedown', (e) => {
+  isDrawing = true;
+  // have to update lastX and lastY again, and need to do it before mousemove event listener
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+});
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mouseout', () => isDrawing = false);
+
+
+</script>
+
+<style>
+  html, body {
+    margin: 0;
+  }
+</style>
+
+</body>
+</html>
